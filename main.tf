@@ -1,1 +1,22 @@
-// Your main module resource goes here
+resource "azurerm_virtual_network" "this" {
+  name                = var.virtual_network_name
+  location            = data.azurerm_resource_group.this.location
+  resource_group_name = data.azurerm_resource_group.this.name
+  address_space       = var.address_spaces
+  // To not cause conflict with azurerm_virtual_network_dns_servers this should never be set
+  dns_servers = []
+
+  bgp_community = var.bgp_community != "" ? var.bgp_community : null
+  edge_zone     = var.edge_zone != "" ? var.edge_zone : null
+
+  dynamic "subnet" {
+    for_each = { for subnet in var.subnets : subnet.name => subnet }
+    content {
+      name           = subnet.value.name
+      address_prefix = subnet.value.address_prefix
+      security_group = subnet.value.security_group_id
+    }
+  }
+
+  tags = local.tags
+}
