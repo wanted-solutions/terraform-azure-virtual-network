@@ -9,14 +9,6 @@ resource "azurerm_virtual_network" "this" {
   bgp_community = var.bgp_community != "" ? var.bgp_community : null
   edge_zone     = var.edge_zone != "" ? var.edge_zone : null
 
-  dynamic "subnet" {
-    for_each = { for subnet in var.subnets : subnet.name => subnet }
-    content {
-      name           = subnet.value.name
-      address_prefix = subnet.value.address_prefix
-      security_group = subnet.value.security_group_id
-    }
-  }
 
   tags = local.tags
 }
